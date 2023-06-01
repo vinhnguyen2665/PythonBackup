@@ -55,7 +55,7 @@ def dump(db_info: BackupInfo):
         try:
             zip_file = file_utils.get_name_without_extension(dump_path) + '.zip'
             file_utils.zip_file(dump_path, zip_file, True)
-            out.append(bytes('dump_path:' + dump_path, 'utf-8'))
+            out.append(bytes('dump_path:' + zip_file, 'utf-8'))
         except Exception as e:
             out.append(e.__str__())
         return out
