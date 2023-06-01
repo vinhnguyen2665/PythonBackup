@@ -18,6 +18,7 @@ def get_version(db_info: BackupInfo):
                      "--execute=\"select version()\""
         # path_exec = os.path.join(file_utils.get_project_root(), "third_party", "my_sql", "win_x64", "mysql.exe")
         path_exec = database_utils.choose_exec_query_path(db_info)
+        resource_utils.download_third_party_resource(path_exec)
         cmd = cmd_format.format(path_exec=path_exec,
                                 host=db_info.host,
                                 port=db_info.port,
