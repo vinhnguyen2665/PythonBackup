@@ -4,7 +4,7 @@ from pathlib import Path
 
 import common.shell_exec as shell
 from entity.backup_info import BackupInfo
-from common import file_utils, log
+from common import file_utils, log, resource_utils
 from common import database_utils
 
 
@@ -58,6 +58,7 @@ def dump(db_info: BackupInfo):
             cmd_format += '--no-tablespaces '
 
         path_exec = database_utils.choose_exec_dump_path(db_info)
+        resource_utils.download_third_party_resource(path_exec)
         dump_path = os.path.join(db_info.dump_dir, database_utils.generate_dump_path(db_info.database_name, '.sql'))
         file_utils.if_not_exist_make_dir(Path(dump_path).parent)
         cmd = cmd_format.format(path_exec=path_exec,

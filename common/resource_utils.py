@@ -1,6 +1,11 @@
 import os
 
+from dotenv import load_dotenv
+
 from common import file_utils, gdrive_download
+import common.shell_exec as shell
+
+load_dotenv()
 
 
 def download_third_party_resource(path: str):
@@ -8,6 +13,8 @@ def download_third_party_resource(path: str):
         file_utils.if_not_exist_make_dir(file_utils.get_parent_path(path))
         url = get_resource_url(path)
         gdrive_download.download_file_from_google_drive(url, path)
+        out, err = shell.exec("echo " + os.getenv('ROOT_PASSWORD') + " | sudo -S chmod +x " + path)
+        print(out)
 
 
 def get_resource_url(path: str):

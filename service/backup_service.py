@@ -94,7 +94,7 @@ def get_version(db_info: BackupInfo):
         BackupType.MySQL: lambda: mysql_service.get_version(db_info),
         BackupType.MongoDB: lambda: mongo_db_service.get_version(db_info),
     }
-    ver = switcher.get(db_info.backup_type, lambda: ResultObject(status=Status.ERROR, data='Invalid Database'))
+    ver = switcher.get(db_info.backup_type, ['Invalid Database'])
     return read_completed_version(ver())
 
 
@@ -103,7 +103,7 @@ def dump(db_info: BackupInfo):
         BackupType.MySQL: lambda: mysql_service.dump(db_info),
         BackupType.MongoDB: lambda: mongo_db_service.dump(db_info),
     }
-    d = switcher.get(db_info.backup_type, lambda: ResultObject(status=Status.ERROR, data='Invalid Database'))
+    d = switcher.get(db_info.backup_type, ['Invalid Database'])
     return read_completed_process(d())
 
 
