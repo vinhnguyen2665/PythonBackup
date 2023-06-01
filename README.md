@@ -17,6 +17,7 @@ python3 -m venv env
 source env/bin/activate
 <br>
 OR
+<br>
 virtualenv --python="/usr/bin/python3.10" "./"
 <br>
 source ./bin/activate
