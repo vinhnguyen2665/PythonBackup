@@ -310,7 +310,7 @@ def test_scp():
     # print(local)
 
 
-def test_download():
+def test_mongo():
 
     # db_info = BackupInfo()
     # db_info.__init__(host='103.1.210.79',
@@ -333,16 +333,16 @@ def test_download():
     # resource_utils.download_third_party_resource(path_exec)
 
     db_info = BackupInfo()
-    db_info.__init__(host='172.18.101.75',
+    db_info.__init__(host='34.146.65.207',
                      port=27017,
                      username='root',
-                     password='123456',
+                     password='Nsmv20231553~',
                      backup_type=BackupType.MongoDB,
-                     database_name='kotei_shisan',
+                     database_name='shashin_kyoyu',
                      authentication_database='admin',
-                     dump_dir='/var/www/backup_db/kotei_shisan',
+                     dump_dir='/var/www/backup_db/shashin_kyoyu',
                      mentions=json.dumps(['<@UEJSM23ML>']),
-                     svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
+                     svn_url='https://nsmp-system.com/svn/backup_db/shashin_kyoyu/',
                      svn_username='vinhnq',
                      svn_password='vinh1996')
 
@@ -372,4 +372,4 @@ def test_apscheduler():
 
 
 if __name__ == '__main__':
-    test_scp()
+    test_mongo()
