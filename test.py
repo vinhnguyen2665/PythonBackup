@@ -266,10 +266,10 @@ def test_db_2():
     database_info_service = DatabaseInfoService(db_connect)
 
     conditions = BackupInfo()
-    conditions.delete_flg = 0
+    conditions.delete_flg = 1
     lst = database_info_service.find_list_database_info(conditions)
     for db_info in lst:
-        result = backup_service.process(db_info)
+        result = backup_service.dump(db_info)
         # result = backup_service.process(db_info)
         # result = ['Tesst', 'Tesst', 'Tesst', 'Tesst', 'Tesst', 'svn_url: https://google.com']
         print(str(result.status) + ' ' + str(result.data))
@@ -290,17 +290,17 @@ def test_scp():
                      svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
                      svn_username='vinhnq',
                      svn_password='vinh1996')
-    # db_info.__init__(host='35.243.88.196',
-    #                  port=22,
-    #                  username='vinhnq',
-    #                  backup_type=BackupType.SCP,
-    #                  remote_folder='/var/www/Morisada',
-    #                  authentication_method=AuthenticationMethod.PublicKey,
-    #                  dump_dir='/var/www/backup_db/morisada_resource',
-    #                  mentions=json.dumps(['<@UEJSM23ML>']),
-    #                  svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
-    #                  svn_username='vinhnq',
-    #                  svn_password='vinh1996')
+    db_info.__init__(host='35.243.88.196',
+                     port=22,
+                     username='vinhnq',
+                     backup_type=BackupType.SCP,
+                     remote_folder='/var/www/Morisada',
+                     authentication_method=AuthenticationMethod.PublicKey,
+                     dump_dir='/var/www/backup_db/morisada_resource',
+                     mentions=json.dumps(['<@UEJSM23ML>']),
+                     svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
+                     svn_username='vinhnq',
+                     svn_password='vinh1996')
 
     r = backup_service.process(db_info)
     print(r)
@@ -372,4 +372,4 @@ def test_apscheduler():
 
 
 if __name__ == '__main__':
-    test_mongo()
+    test_db_2()
