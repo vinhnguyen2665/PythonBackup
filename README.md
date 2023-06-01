@@ -12,6 +12,13 @@ sudo dpkg -i libncurses5 third_party/my_sql/libssl1.1_1.1.1-1ubuntu2.1~18.04.22_
 <hr>
 https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/
 <br>
+python3 -m venv env
+source env/bin/activate
+<br>
+OR
 virtualenv --python="/usr/bin/python3.10" "./"
 <br>
 source ./bin/activate
+
+
+
