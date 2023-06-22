@@ -20,6 +20,7 @@ pinject==0.14.1
 protobuf==3.20.3
 pycparser==2.21
 pydantic==1.10.7
+pydantic[email]>=1.0.3
 PyJWT==2.7.0
 PyNaCl==1.5.0
 pysubversion==1.0.1

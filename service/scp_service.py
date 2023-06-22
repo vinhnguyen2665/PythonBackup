@@ -25,6 +25,7 @@ def byte_count(size, file_size):
 
 def pull(db_info: BackupInfo):
     step_arr = []
+    already_count = 0
     client = SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(AutoAddPolicy())
@@ -72,8 +73,8 @@ def pull(db_info: BackupInfo):
                 modified = is_modified(local_path, file_info)
                 is_exist = file_utils.is_exist(local_path)
                 if not modified and is_exist:
+                    already_count += 1
                     m = 'already exists ' + file_info.path
-                    step_arr.append(m)
                     log.info(m)
                 else:
                     if is_exist:
@@ -107,7 +108,12 @@ def pull(db_info: BackupInfo):
         return ResultObject(Status.ERROR, db_info.remote_folder + ' ' + e.__str__(), step_arr)
     sftp.close()
     # scp.close()
-    return ResultObject(Status.OK, 'SUCCESS ' + db_info.remote_folder, step_arr)
+    msg = 'SUCCESS ' + db_info.remote_folder + ' > ' + db_info.dump_dir
+    data = [msg]
+    if already_count != 0:
+        msg += " already " + str(already_count) + '/' + str(len(files))
+        data.append("already " + str(already_count) + '/' + str(len(files)))
+    return ResultObject(Status.OK, msg, data)
 
 
 def is_modified(local_path: str, file_info: FileInfo):

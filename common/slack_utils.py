@@ -80,6 +80,10 @@ class SlackUtils:
             #         "short": True
             #     }
             # ]
+            if db_info.database_name:
+                context = "/" + db_info.database_name + " <" + url + "| Download>"
+            else:
+                context = " " + db_info.remote_folder
             message_attachments = [
                 {
                     "mrkdwn_in": ["text"],
@@ -89,8 +93,10 @@ class SlackUtils:
                     # "author_link": "http://flickr.com/bobby/",
                     # "author_icon": "https://placeimg.com/16/16/people",
                     # "title": "*" + db_info.host + ":" + str(db_info.port) + "/" + db_info.database_name + "*",
+
+
                     "title": db_info.host + ":" + str(
-                        db_info.port) + "/" + db_info.database_name + " <" + url + "| Download>",
+                        db_info.port) + context,
                     # "title_link": url,
                     "text": msg_text,
                     # "fields": fields,
