@@ -12,7 +12,7 @@ from scp import SCPClient
 
 from beans.file_info import FileInfo
 from beans.result_object import ResultObject
-from common import file_utils, log
+from common import file_utils, log, sys_utils
 from entity.backup_info import BackupInfo
 from enum_class.authentication_method import AuthenticationMethod
 from enum_class.file_type import FileType
@@ -47,46 +47,67 @@ def pull(db_info: BackupInfo):
 
     sftp = client.open_sftp()
     try:
-        files = walk(sftp, db_info.remote_folder)
+        files = walk(client, sftp, db_info, db_info.remote_folder)
     except Exception as e:
         log.error(e)
         step_arr.append(e.__str__())
         return ResultObject(Status.ERROR, db_info.remote_folder + ' ' + e.__str__(), step_arr)
 
-    for file_info in files:
-        local_path = convert_remote2local_dir(db_info.remote_folder, db_info.dump_dir, file_info.path)
-        file_utils.if_not_exist_make_dir(file_utils.get_parent_path(local_path))
-        log.info('==================' + file_info.path + '==================')
-        if file_info.file_type == FileType.FILE:
-            modified = is_modified(local_path, file_info)
-            is_exist = file_utils.is_exist(local_path)
-            if not modified:
-                log.info('already exists')
-            else:
-                if is_exist:
-                    parent_path = file_utils.get_parent_path(local_path)
-                    file_name = file_utils.get_file_name_in_path(local_path)
-                    if file_info.last_modified:
-                        move_folder = "modified_" + file_info.last_modified.strftime("%Y_%m_%d")
-                    else:
-                        move_folder = "modified_" + file_utils.temp_name_from_date()
-                    modified_path = os.path.join(parent_path, move_folder, file_name)
-                    file_utils.if_not_exist_make_dir(file_utils.get_parent_path(modified_path))
-                    shutil.move(local_path, modified_path)
+    try:
+        for file_info in files:
+            local_path = convert_remote2local_dir(db_info.remote_folder, db_info.dump_dir, file_info.path)
+            file_utils.if_not_exist_make_dir(file_utils.get_parent_path(local_path))
+            log.info('==================' + file_info.path + '==================')
+            # permissions = file_info.permissions
+            # read_permission = permissions[2:]
+            # if int(read_permission) < 4:
+            #     new_permissions = permissions[:2] + '4'
+            #     if db_info.authentication_method == AuthenticationMethod.Password:
+            #         cmd = "sudo chmod " + new_permissions + " " + file_info.path
+            #     else:
+            #         cmd = "echo " + db_info.password + " | sudo chmod " + new_permissions + " " + file_info.path
+            #     stdin, stdout, stderr = client.exec_command(cmd)
 
-                sftp.get(remotepath=file_info.path, localpath=local_path, callback=byte_count)
-                # os.utime(local_path, (file_info.access_time.timestamp(), file_info.last_modified.timestamp()))
-                a_file = filedate.File(local_path)
-                a_file.set(
-                    created=file_info.access_time.strftime("%Y-%m-%d/, %H:%M:%S"),
-                    modified=file_info.last_modified.strftime("%Y-%m-%d/, %H:%M:%S"),
-                    accessed=file_info.access_time.strftime("%Y-%m-%d/, %H:%M:%S")
-                )
-                after = filedate.File(local_path)
-                print(after)
+            if file_info.file_type == FileType.FILE:
+                modified = is_modified(local_path, file_info)
+                is_exist = file_utils.is_exist(local_path)
+                if not modified and is_exist:
+                    m = 'already exists ' + file_info.path
+                    step_arr.append(m)
+                    log.info(m)
+                else:
+                    if is_exist:
+                        parent_path = file_utils.get_parent_path(local_path)
+                        file_name = file_utils.get_file_name_in_path(local_path)
+                        if file_info.last_modified:
+                            move_folder = "modified_on_" + file_info.last_modified.strftime("%Y_%m_%d")
+                        else:
+                            move_folder = "modified_on_" + file_utils.temp_name_from_date()
+                        modified_path = os.path.join(parent_path, move_folder, file_name)
+                        file_utils.if_not_exist_make_dir(file_utils.get_parent_path(modified_path))
+                        shutil.move(local_path, modified_path)
+                        m = 'move ' + local_path + ' > ' + modified_path
+                        step_arr.append(m)
 
+                    sftp.get(remotepath=file_info.path, localpath=local_path, callback=byte_count)
+                    # os.utime(local_path, (file_info.access_time.timestamp(), file_info.last_modified.timestamp()))
+                    m = 'get ' + file_info.path
+                    step_arr.append(m)
+                    a_file = filedate.File(local_path)
+                    a_file.set(
+                        created=file_info.access_time.strftime("%Y-%m-%d/, %H:%M:%S"),
+                        modified=file_info.last_modified.strftime("%Y-%m-%d/, %H:%M:%S"),
+                        accessed=file_info.access_time.strftime("%Y-%m-%d/, %H:%M:%S")
+                    )
+                    after = filedate.File(local_path)
+                    print(after)
+    except Exception as e:
+        log.error(e)
+        step_arr.append(e.__str__())
+        return ResultObject(Status.ERROR, db_info.remote_folder + ' ' + e.__str__(), step_arr)
     sftp.close()
     # scp.close()
+    return ResultObject(Status.OK, 'SUCCESS ' + db_info.remote_folder, step_arr)
 
 
 def is_modified(local_path: str, file_info: FileInfo):
@@ -103,19 +124,56 @@ def convert_remote2local_dir(root_remote_path, root_local_path, remote_path):
     return os.path.join(root_local_path, tmp)
 
 
-def walk(sftp, remote_path):
+def walk(client, sftp, db_info, remote_path):
     res = []
-    for entry in sftp.listdir_attr(remote_path):
+
+    try:
+        filelist = sftp.listdir_attr(remote_path)
+    except Exception as e:
+        log.error(e)
+
+    for entry in filelist:
         mode = entry.st_mode
         path = remote_path + '/' + entry.filename
         m_time = datetime.fromtimestamp(entry.st_mtime)
         a_time = datetime.fromtimestamp(entry.st_atime)
+        long_name = entry.longname
+        permissions = long_name[:10]
+        permissions_int = sys_utils.permission_to_num(permissions)
+        read_permission = permissions_int[2:]
+
         if S_ISDIR(mode):
             print(path + " is folder")
-            res.append(FileInfo(file_type=FileType.DIR, path=path, access_time=a_time, last_modified=m_time))
-            _walks = walk(sftp, path)
+            if int(read_permission) < 5:
+                permissions_int = permissions_int[:2] + '5'
+                if db_info.authentication_method == AuthenticationMethod.Password:
+                    cmd = "echo " + db_info.password + " | sudo chmod " + permissions_int + " " + path
+                else:
+                    cmd = "sudo chmod " + permissions_int + " " + path
+                stdin, stdout, stderr = client.exec_command(cmd)
+
+            res.append(FileInfo(file_type=FileType.DIR,
+                                path=path,
+                                access_time=a_time,
+                                last_modified=m_time,
+                                permissions=permissions_int))
+
+            _walks = walk(client, sftp, db_info, path)
             res += _walks
         elif S_ISREG(mode):
             print(path + " is file")
-            res.append(FileInfo(file_type=FileType.FILE, path=path, access_time=a_time, last_modified=m_time))
+
+            if int(read_permission) < 4:
+                permissions_int = permissions_int[:2] + '4'
+                if db_info.authentication_method == AuthenticationMethod.Password:
+                    cmd = "echo " + db_info.password + " | sudo chmod " + permissions_int + " " + path
+                else:
+                    cmd = "sudo chmod " + permissions_int + " " + path
+                stdin, stdout, stderr = client.exec_command(cmd)
+
+            res.append(FileInfo(file_type=FileType.FILE,
+                                path=path,
+                                access_time=a_time,
+                                last_modified=m_time,
+                                permissions=permissions_int))
     return res

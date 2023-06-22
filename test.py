@@ -266,11 +266,11 @@ def test_db_2():
     database_info_service = DatabaseInfoService(db_connect)
 
     conditions = BackupInfo()
-    conditions.delete_flg = 1
+    conditions.delete_flg = 2
     lst = database_info_service.find_list_database_info(conditions)
     for db_info in lst:
-        result = backup_service.dump(db_info)
-        # result = backup_service.process(db_info)
+        # result = backup_service.dump(db_info)
+        result = backup_service.process(db_info)
         # result = ['Tesst', 'Tesst', 'Tesst', 'Tesst', 'Tesst', 'svn_url: https://google.com']
         print(str(result.status) + ' ' + str(result.data))
 
