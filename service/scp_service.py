@@ -17,6 +17,7 @@ from entity.backup_info import BackupInfo
 from enum_class.authentication_method import AuthenticationMethod
 from enum_class.file_type import FileType
 from enum_class.status import Status
+import re
 
 
 def byte_count(size, file_size):
@@ -48,12 +49,13 @@ def pull(db_info: BackupInfo):
 
     sftp = client.open_sftp()
     try:
-        files = walk(client, sftp, db_info, db_info.remote_folder)
+        files = ftp_walk(client, sftp, db_info, db_info.remote_folder)
     except Exception as e:
         log.error(e)
         step_arr.append(e.__str__())
         return ResultObject(Status.ERROR, db_info.remote_folder + ' ' + e.__str__(), step_arr)
-
+    local_array = local_walk(db_info.dump_dir)
+    saved_array = []
     try:
         for file_info in files:
             local_path = convert_remote2local_dir(db_info.remote_folder, db_info.dump_dir, file_info.path)
@@ -70,6 +72,7 @@ def pull(db_info: BackupInfo):
             #     stdin, stdout, stderr = client.exec_command(cmd)
 
             if file_info.file_type == FileType.FILE:
+                saved_array.append(local_path)
                 modified = is_modified(local_path, file_info)
                 is_exist = file_utils.is_exist(local_path)
                 if not modified and is_exist:
@@ -110,9 +113,35 @@ def pull(db_info: BackupInfo):
     # scp.close()
     msg = 'SUCCESS ' + db_info.remote_folder + ' > ' + db_info.dump_dir
     data = [msg]
+    delete_count = 0
+    try:
+        time_now = datetime.now()
+        for local in local_array:
+            local_path = local.path
+            file_name = file_utils.get_file_name_in_path(local_path)
+            parent_name = file_utils.get_parent_name(local_path)
+            ignore_modified = re.search("^modified_\d{4}_\d{2}_\d{2}$", parent_name)
+            ignore_delete = re.search("delete_\d{4}_\d{2}_\d{2}$", parent_name)
+
+            filter_list = list(filter(lambda x: str(local_path).__eq__(x), saved_array))
+
+            if not filter_list and not ignore_modified and not ignore_delete:
+                parent_dir = file_utils.get_parent_path(local_path)
+                move_dir = parent_dir.__str__() + "_delete_" + time_now.strftime("%Y_%m_%d")
+                move_path = os.path.join(move_dir, file_name)
+                file_utils.if_not_exist_make_dir(move_dir)
+                shutil.move(local_path, move_path)
+                delete_count += 1
+    except Exception as e:
+        log.error(e)
+
     if already_count != 0:
         msg += " already " + str(already_count) + '/' + str(len(files))
         data.append("already " + str(already_count) + '/' + str(len(files)))
+
+    if delete_count != 0:
+        msg += " delete " + str(delete_count)
+        data.append(" delete " + str(delete_count))
     return ResultObject(Status.OK, msg, data)
 
 
@@ -130,7 +159,40 @@ def convert_remote2local_dir(root_remote_path, root_local_path, remote_path):
     return os.path.join(root_local_path, tmp)
 
 
-def walk(client, sftp, db_info, remote_path):
+def local_walk(path):
+    res = []
+
+    try:
+        for root, dirs, files in os.walk(path):
+            # path = root.split(os.sep)
+            # print(root)
+            # print(dirs)
+            # print(files)
+            # print((len(path) - 1) * '---', os.path.basename(root))
+            for _dir in dirs:
+                print("dir: " + os.path.join(root, _dir))
+            for file in files:
+                # print(len(path) * '---', file)
+                p = os.path.join(root, file)
+                # file modification
+                m_time = os.path.getmtime(p)
+                # file creation
+                ctime = os.path.getctime(p)
+                a_time = os.path.getatime(p)
+                status = os.stat(p)
+                permissions_int = oct(status.st_mode)[-3:]
+
+                res.append(FileInfo(file_type=FileType.FILE,
+                                    path=p,
+                                    access_time=datetime.fromtimestamp(a_time),
+                                    last_modified=datetime.fromtimestamp(m_time),
+                                    permissions=permissions_int))
+    except Exception as e:
+        log.error(e)
+    return res
+
+
+def ftp_walk(client, sftp, db_info, remote_path):
     res = []
 
     try:
@@ -164,7 +226,7 @@ def walk(client, sftp, db_info, remote_path):
                                 last_modified=m_time,
                                 permissions=permissions_int))
 
-            _walks = walk(client, sftp, db_info, path)
+            _walks = ftp_walk(client, sftp, db_info, path)
             res += _walks
         elif S_ISREG(mode):
             print(path + " is file")

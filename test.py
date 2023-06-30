@@ -285,24 +285,25 @@ def test_scp():
                      backup_type=BackupType.SCP,
                      remote_folder='/var/www/shashin_kyoyu',
                      authentication_method=AuthenticationMethod.Password,
-                     dump_dir='/var/www/backup_db/shashin_kyoyu_resource',
+                     dump_dir='/var/www/backup_db/shashin_kyoyu_resources',
                      mentions=json.dumps(['<@UEJSM23ML>']),
                      svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
                      svn_username='vinhnq',
                      svn_password='vinh1996')
-    db_info.__init__(host='35.243.88.196',
-                     port=22,
-                     username='vinhnq',
-                     backup_type=BackupType.SCP,
-                     remote_folder='/var/www/Morisada',
-                     authentication_method=AuthenticationMethod.PublicKey,
-                     dump_dir='/var/www/backup_db/morisada_resource',
-                     mentions=json.dumps(['<@UEJSM23ML>']),
-                     svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
-                     svn_username='vinhnq',
-                     svn_password='vinh1996')
+    # db_info.__init__(host='35.243.88.196',
+    #                  port=22,
+    #                  username='vinhnq',
+    #                  backup_type=BackupType.SCP,
+    #                  remote_folder='/var/www/Morisada',
+    #                  authentication_method=AuthenticationMethod.PublicKey,
+    #                  dump_dir='/var/www/backup_db/morisada_resource',
+    #                  mentions=json.dumps(['<@UEJSM23ML>']),
+    #                  svn_url='https://nsmp-system.com/svn/backup_db/kotei_shisan/',
+    #                  svn_username='vinhnq',
+    #                  svn_password='vinh1996')
 
     r = backup_service.process(db_info)
+    # r = scp_service.local_walk(db_info.dump_dir)
     print(r)
     # local = scp_service.convert_remote2local_dir(root_remote_path='/var/www/shashin_kyoyu/',
     #                                      root_local_path='/var/www/backup_db/shashin_kyoyu_resource',
@@ -311,7 +312,6 @@ def test_scp():
 
 
 def test_mongo():
-
     # db_info = BackupInfo()
     # db_info.__init__(host='103.1.210.79',
     #                      port=3306,
@@ -349,6 +349,7 @@ def test_mongo():
     get_version = backup_service.dump(db_info)
     print(get_version.data)
 
+
 def test_zip():
     file_utils.zip_file('/var/www/backup_db/nogigps/2023.05.09/nogigps_2023.05.09_10.25.36.688.sql',
                         '/var/www/backup_db/nogigps/2023.05.09/nogigps_2023.05.09_10.25.36.688.zip')
@@ -372,4 +373,4 @@ def test_apscheduler():
 
 
 if __name__ == '__main__':
-    test_db_2()
+    test_scp()
