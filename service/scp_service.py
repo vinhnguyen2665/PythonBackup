@@ -123,9 +123,11 @@ def pull(db_info: BackupInfo):
             ignore_modified = re.search("^modified_\d{4}_\d{2}_\d{2}$", parent_name)
             ignore_delete = re.search("delete_\d{4}_\d{2}_\d{2}$", parent_name)
 
+            ignore = not ignore_modified and not ignore_delete
+
             filter_list = list(filter(lambda x: str(local_path).__eq__(x), saved_array))
 
-            if not filter_list and not ignore_modified and not ignore_delete:
+            if not filter_list and ignore:
                 parent_dir = file_utils.get_parent_path(local_path)
                 move_dir = parent_dir.__str__() + "_delete_" + time_now.strftime("%Y_%m_%d")
                 move_path = os.path.join(move_dir, file_name)
