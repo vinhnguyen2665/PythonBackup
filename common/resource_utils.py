@@ -48,6 +48,11 @@ def get_resource_url(path: str):
             "https://drive.google.com/u/0/uc?id=138WLLg7E2t-ZnZGqPsqm1IVm_elpLV0r&export=download",
         os.path.join(file_utils.get_project_root(), "third_party", "mongo_db", "linux_x64", "mongosh"):
             "https://drive.google.com/u/0/uc?id=1SqmTLa71K-Ra1igpivr5kcY9QxyaWrOc&export=download",
+
+        os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "linux_x64", "pg_dump"):
+            "https://drive.google.com/u/0/uc?id=1CGNARvbeGHEAfcRRANbJLdBjTCwGSaCV&export=download",
+        os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "linux_x64", "psql"):
+            "https://drive.google.com/u/0/uc?id=17PuwJZRkQ2--RTeideFrNVGohmftxg1e&export=download",
     }
     path_exec = switcher.get(path, None)
     return path_exec

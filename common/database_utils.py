@@ -38,6 +38,14 @@ def choose_exec_query_path(db_info: BackupInfo):
             Platform.Linux_64: os.path.join(file_utils.get_project_root(), "third_party", "mongo_db", "linux_x64", "mongosh"),
         }
         path_exec = switcher.get(platform, None)
+    elif BackupType.PostgreSQL == db_info.backup_type:
+        switcher = {
+            Platform.Windows_64: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "win32-x64", "psql.exe"),
+            Platform.Windows_32: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "win32-x64", "psql.exe"),
+            # Platform.Linux_32: os.path.join(file_utils.get_project_root(), "third_party", "mongo_db", "linux_x32", "mongosh"),
+            Platform.Linux_64: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "linux_x64", "psql"),
+        }
+        path_exec = switcher.get(platform, None)
 
     return path_exec
 
@@ -59,6 +67,14 @@ def choose_exec_dump_path(db_info: BackupInfo):
             Platform.Windows_32: os.path.join(file_utils.get_project_root(), "third_party", "mongo_db", "win32-x64", "mongodump.exe"),
             Platform.Linux_32: os.path.join(file_utils.get_project_root(), "third_party", "mongo_db", "ubuntu_x86_64", "mongodump"),
             Platform.Linux_64: os.path.join(file_utils.get_project_root(), "third_party", "mongo_db", "ubuntu_x86_64", "mongodump"),
+        }
+        path_exec = switcher.get(platform, None)
+    elif BackupType.PostgreSQL == db_info.backup_type:
+        switcher = {
+            Platform.Windows_64: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "win32-x64", "pg_dump.exe"),
+            Platform.Windows_32: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "win32-x64", "pg_dump.exe"),
+            Platform.Linux_32: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "linux_x32", "pg_dump"),
+            Platform.Linux_64: os.path.join(file_utils.get_project_root(), "third_party", "postgresql", "linux_x64", "pg_dump"),
         }
         path_exec = switcher.get(platform, None)
     return path_exec

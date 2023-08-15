@@ -12,7 +12,7 @@ import service.mysql_service as mysql_service
 from entity.backup_info import BackupInfo
 from common.shell_exec import read_completed_process
 from enum_class.svn_status import SvnStatus
-from service import scp_service
+from service import scp_service, postgresql_service
 
 
 def gen_key_name(key: str, _map: any, index: int = 0):
@@ -36,6 +36,7 @@ def process(db_info: BackupInfo):
                 BackupType.MySQL: lambda: database_backup(db_info),
                 BackupType.MongoDB: lambda: database_backup(db_info),
                 BackupType.SCP: lambda: scp_service.pull(db_info),
+                BackupType.PostgreSQL: lambda: database_backup(db_info),
             }
             p = switcher.get(db_info.backup_type, lambda: ResultObject(status=Status.ERROR,message='Invalid Backup Type', data='Invalid Backup Type'))
             return p()
@@ -93,6 +94,7 @@ def get_version(db_info: BackupInfo):
     switcher = {
         BackupType.MySQL: lambda: mysql_service.get_version(db_info),
         BackupType.MongoDB: lambda: mongo_db_service.get_version(db_info),
+        BackupType.PostgreSQL: lambda: postgresql_service.get_version(db_info),
     }
     ver = switcher.get(db_info.backup_type, ['Invalid Database'])
     return read_completed_version(ver())
@@ -102,6 +104,7 @@ def dump(db_info: BackupInfo):
     switcher = {
         BackupType.MySQL: lambda: mysql_service.dump(db_info),
         BackupType.MongoDB: lambda: mongo_db_service.dump(db_info),
+        BackupType.PostgreSQL: lambda: postgresql_service.dump(db_info),
     }
     d = switcher.get(db_info.backup_type, ['Invalid Database'])
     return read_completed_process(d())
@@ -113,7 +116,9 @@ def read_completed_version(shell_out):
     if shell_out:
         for out in shell_out:
             tmp = out.decode("utf-8")
-            re_flg = re.search("^[0-9]+(\\.[0-9]+)*", tmp)
+            # re_flg = re.search("^[0-9]+(\\.[0-9]+)*", tmp)
+            re_flg = re.search("^[0-9]+(.[0-9]+)*", tmp.strip())
+            # re_flg = re.search("[0-9]+(.[0-9]+)*", tmp)
             msg.append(tmp)
             if re_flg:
                 version = tmp.replace('\r\n', '').replace('\n', '')

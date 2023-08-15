@@ -87,6 +87,67 @@ def test_mongo():
     # SlackUtils.post_message(db_info)
 
 
+def test_postgresql():
+    db_info = BackupInfo()
+    db_info.__init__(host='172.18.101.75',
+                     port=5432,
+                     username='postgres',
+                     password='123456',
+                     backup_type=BackupType.PostgreSQL,
+                     database_name='openproject',
+                     dump_dir='/var/www/backup_db/openproject',
+                     mentions=json.dumps(['<@UEJSM23ML>']),
+                     svn_url='https://nsmp-system.com/svn/backup_db/openproject/',
+                     svn_username='vinhnq',
+                     svn_password='vinh1996')
+
+    # mentions = ['<@U012Q4ED5NJ>', '<!channel>']
+
+    # result = SvnUtils.check_out(db_info)
+
+    result = backup_service.process(db_info)
+    # result = backup_service.process(db_info)
+    # result = ['Tesst', 'Tesst', 'Tesst', 'Tesst', 'Tesst', 'svn_url: https://google.com']
+    print(result)
+    # SlackUtils.post_message(db_info, result.data)
+    # tmp = read_completed_process(out, err)
+    # print(tmp.message)
+    # out = SvnUtils.update(db_info.dump_dir)
+    # tmp = read_completed_process(out)
+    # print(tmp.message)
+    # SlackUtils.post_message(db_info)
+
+
+def test_mysql():
+    db_info = BackupInfo()
+    db_info.__init__(host='172.18.101.75',
+                     port=3306,
+                     username='root',
+                     password='123456',
+                     backup_type=BackupType.MySQL,
+                     database_name='rfid_sendai',
+                     dump_dir='/var/www/backup_db/openproject',
+                     mentions=json.dumps(['<@UEJSM23ML>']),
+                     svn_url='https://nsmp-system.com/svn/backup_db/openproject/',
+                     svn_username='vinhnq',
+                     svn_password='vinh1996')
+
+    # mentions = ['<@U012Q4ED5NJ>', '<!channel>']
+
+    # result = SvnUtils.check_out(db_info)
+
+    result = backup_service.process(db_info)
+    # result = backup_service.process(db_info)
+    # result = ['Tesst', 'Tesst', 'Tesst', 'Tesst', 'Tesst', 'svn_url: https://google.com']
+    print(result)
+    # SlackUtils.post_message(db_info, result.data)
+    # tmp = read_completed_process(out, err)
+    # print(tmp.message)
+    # out = SvnUtils.update(db_info.dump_dir)
+    # tmp = read_completed_process(out)
+    # print(tmp.message)
+    # SlackUtils.post_message(db_info)
+
 def init_db():
     # mentions = ['<@U012Q4ED5NJ>', '<!channel>']
     # db_info = BackupInfo(host='103.1.210.79',
@@ -373,4 +434,5 @@ def test_apscheduler():
 
 
 if __name__ == '__main__':
-    test_scp()
+    test_mysql()
+    # test_postgresql()
