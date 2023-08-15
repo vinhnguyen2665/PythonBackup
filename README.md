@@ -1,9 +1,5 @@
 # PythonBackup
 PythonBackup
-
-git pull
-<br>
-git lfs pull
 <br>
 sudo apt install libncurses5
 <br>
