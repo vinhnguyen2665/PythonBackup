@@ -1,3 +1,5 @@
+from sqlalchemy import and_
+
 from common import log
 from entity.backup_info import BackupInfo
 from orm_config.init_orm import OrmConfig
@@ -13,8 +15,17 @@ class DatabaseInfoService:
     def find_list_database_info(self, conditions: BackupInfo):
         try:
             session = self.dbConnect.get_session()
-            query = session.query(BackupInfo).where(BackupInfo.delete_flg == conditions.delete_flg)
+            # query = session.query(BackupInfo).where(
+            #     BackupInfo.delete_flg == conditions.delete_flg
+            # )
 
+            # conditions.database_name
+            # OR
+            # BackupInfo.database_name == conditions.database_name,
+            query = session.query(BackupInfo) \
+                .filter(and_(BackupInfo.database_name == conditions.database_name if conditions.database_name is not None else True,
+                             BackupInfo.delete_flg == conditions.delete_flg if conditions.delete_flg is not None else True
+                             ))
             result = query.all()
             # print(query)
             return result

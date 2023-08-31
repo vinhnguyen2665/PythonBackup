@@ -8,10 +8,10 @@ from beans.login_request import LoginRequest
 import security.security as security
 from beans.login_response import LoginResponse
 
-router = APIRouter()
+authorization_router = APIRouter()
 
 
-@router.post('/login', response_model=LoginResponse)
+@authorization_router.post('/login', response_model=LoginResponse)
 def login(request_data: LoginRequest) -> Any:
     print(f'[x] request_data: {request_data.__dict__}')
     token = security.generate_token(request_data.username)
@@ -27,6 +27,6 @@ def login(request_data: LoginRequest) -> Any:
     #     raise HTTPException(status_code=404, detail="User not found")
 
 
-@router.get('/books', dependencies=[Depends(security.validate_token)])
-def list_books():
-    return {'data': ['Sherlock Homes', 'Harry Potter', 'Rich Dad Poor Dad']}
+# @authorization_router.get('/books', dependencies=[Depends(security.validate_token)])
+# def list_books():
+#     return {'data': ['Sherlock Homes', 'Harry Potter', 'Rich Dad Poor Dad']}

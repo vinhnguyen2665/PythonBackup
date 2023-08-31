@@ -45,7 +45,7 @@ def pull(db_info: BackupInfo):
     except Exception as e:
         log.error(e)
         step_arr.append(e.__str__())
-        return ResultObject(Status.ERROR, db_info.__str__() + ' ' + e.__str__(), step_arr)
+        return ResultObject(status=Status.ERROR, message=db_info.__str__() + ' ' + e.__str__(), data=step_arr)
 
     sftp = client.open_sftp()
     try:
@@ -53,7 +53,7 @@ def pull(db_info: BackupInfo):
     except Exception as e:
         log.error(e)
         step_arr.append(e.__str__())
-        return ResultObject(Status.ERROR, db_info.remote_folder + ' ' + e.__str__(), step_arr)
+        return ResultObject(status=Status.ERROR, message=db_info.remote_folder + ' ' + e.__str__(), data=step_arr)
     local_array = local_walk(db_info.dump_dir)
     saved_array = []
     try:
@@ -108,7 +108,7 @@ def pull(db_info: BackupInfo):
     except Exception as e:
         log.error(e)
         step_arr.append(e.__str__())
-        return ResultObject(Status.ERROR, db_info.remote_folder + ' ' + e.__str__(), step_arr)
+        return ResultObject(status=Status.ERROR, message=db_info.remote_folder + ' ' + e.__str__(), data=step_arr)
     sftp.close()
     # scp.close()
     msg = 'SUCCESS ' + db_info.remote_folder + ' > ' + db_info.dump_dir
@@ -144,7 +144,7 @@ def pull(db_info: BackupInfo):
     if delete_count != 0:
         msg += " delete " + str(delete_count)
         data.append(" delete " + str(delete_count))
-    return ResultObject(Status.OK, msg, data)
+    return ResultObject(status=Status.OK, message=msg, data=data)
 
 
 def is_modified(local_path: str, file_info: FileInfo):

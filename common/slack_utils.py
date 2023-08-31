@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 
-from beans.result_object import ResultObject
 from entity.backup_info import BackupInfo
 import json
 

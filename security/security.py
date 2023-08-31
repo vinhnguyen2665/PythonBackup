@@ -8,7 +8,7 @@ from fastapi.security import HTTPBearer
 from pydantic import ValidationError
 
 SECURITY_ALGORITHM = 'HS256'
-SECRET_KEY = '123456'
+SECRET_KEY = 'Authorization123456'
 
 reusable_oauth2 = HTTPBearer(
     scheme_name='Authorization'
@@ -22,7 +22,7 @@ def generate_token(subject: str, expires_delta: timedelta = None) -> str:
         expire = datetime.utcnow() + timedelta(
             seconds=60 * 60 * 24 * 3  # Expired after 3 days
         )
-    to_encode = {"exp": expire, "sub": subject}
+    to_encode = {"exp": expire.timestamp(), "sub": subject}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=SECURITY_ALGORITHM)
     return encoded_jwt
 
@@ -33,9 +33,10 @@ def validate_token(http_authorization_credentials=Depends(reusable_oauth2)) -> s
     """
     try:
         payload = jwt.decode(http_authorization_credentials.credentials, SECRET_KEY, algorithms=[SECURITY_ALGORITHM])
-        if payload.get('username') < datetime.now():
+        # if payload.get('username') < datetime.now():
+        if payload.get('exp') < datetime.now().timestamp():
             raise HTTPException(status_code=403, detail="Token expired")
-        return payload.get('username')
+        return payload.get('sub')
     except(jwt.PyJWTError, ValidationError):
         raise HTTPException(
             status_code=403,

@@ -180,10 +180,10 @@ class SvnUtils:
                     out, err = SvnUtils.commit(db_info, str(file_utils.get_parent_path(svn.path)), "commit")
                     tmp = shell.read_completed_process(out, err)
                     res += copy.deepcopy(tmp.data)
-            return ResultObject(Status.OK, res, res)
+            return ResultObject(status=Status.OK, message=res, data=res)
         except Exception as e:
             log.error(e)
-            return ResultObject(Status.ERROR, "ERROR", e)
+            return ResultObject(status=Status.ERROR, message="ERROR", data=e)
 
     @staticmethod
     def status(db_info: BackupInfo, path: str):
@@ -236,7 +236,7 @@ class SvnUtils:
                                     password=db_info.svn_password)
             out, err = shell.exec(cmd)
             tmp = shell.read_completed_process(out, err)
-            info = SvnInfo
+            info = SvnInfo()
             if tmp.status == Status.OK:
                 for svn in tmp.data:
                     t_var = svn.split(':')[0]

@@ -76,7 +76,6 @@ def database_backup(db_info: BackupInfo):
     # svn
     commit_dir = SvnUtils.commit_dir(db_info)
     step_arr += commit_dir.data
-
     # if dump_result_map.__contains__('dump_path'):
     #     print("")
     # el
@@ -87,7 +86,7 @@ def database_backup(db_info: BackupInfo):
             info = SvnUtils.info(db_info, dump_result_map.get('dump_path'))
             if info and info.url:
                 step_arr.append("svn_url:" + info.url)
-        return ResultObject(Status.OK, step_arr, step_arr)
+        return ResultObject(status=Status.OK, message=step_arr, data=step_arr)
 
 
 def get_version(db_info: BackupInfo):

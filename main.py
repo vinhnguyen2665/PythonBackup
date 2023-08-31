@@ -1,12 +1,12 @@
 import threading
 
-from controller.api import api_router
+from controller.endpoints import authorization, backup_api
 from orm_config.init_orm import OrmConfig
 from service.schedule_service import ScheduleService
 import logging
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from dotenv import load_dotenv
 from service.backup_info_service import DatabaseInfoService
 
@@ -21,10 +21,23 @@ def init_uvicorn():
 
 
 app = FastAPI(
-    title='FastAPI JWT', openapi_url='/openapi.json', docs_url='/docs',
+    title='FastAPI JWT',
+    openapi_url='/openapi.json',
+    # docs_url=None,  # Disable docs (Swagger UI)
+    # redoc_url=None,  # Disable redoc
+    docs_url='/',
     description='fastapi jwt'
 )
-app.include_router(api_router, prefix="")
+
+app.include_router(authorization.authorization_router, prefix="/api/auth", tags=["authorization"])
+app.include_router(backup_api.backup_api_router, prefix="/api/backup", tags=["backup_api"])
+
+
+@app.get(path='/docs')
+def alive():
+    return "Alive"
+
+
 db_connect = None
 if __name__ == '__main__':
     load_dotenv()
