@@ -32,12 +32,20 @@ def get_version(db_info: BackupInfo):
 
 def dump(db_info: BackupInfo):
     try:
+        # remove use schema
+        #cmd_format = "{path_exec} " \
+        #             "--host={host} " \
+        #             "--port={port} " \
+        #             "--user=\"{user}\" " \
+        #             "--password=\"{password}\" " \
+        #             "--databases \"{database}\" " \
+        #             "--result-file={dump_path} "
         cmd_format = "{path_exec} " \
                      "--host={host} " \
                      "--port={port} " \
                      "--user=\"{user}\" " \
                      "--password=\"{password}\" " \
-                     "--databases \"{database}\" " \
+                     "\"{database}\" " \
                      "--result-file={dump_path} "
         if db_info.skip_lock_table:
             cmd_format += '--skip-lock-tables '
