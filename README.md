@@ -1,7 +1,7 @@
 # PythonBackup
 PythonBackup
 <br>
-sudo apt install libncurses5
+sudo apt install libncurses5 (curl -O http://launchpadlibrarian.net/648013231/libtinfo5_6.4-2_amd64.deb)
 <br>
 sudo dpkg -i libncurses5 third_party/my_sql/libssl1.1_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
 <br>
