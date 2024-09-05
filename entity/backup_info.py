@@ -23,6 +23,8 @@ class BackupInfo(Base):
     skip_lock_table = Column(Boolean)
     column_statistics = Column(Integer)
     no_table_spaces = Column(Boolean)
+    routines = Column(String)
+    create_schema = Column(String)
     remote_folder = Column(String)
     authentication_method = Column(Enum(AuthenticationMethod))
     dump_time = Column(String)
@@ -87,6 +89,8 @@ class BackupInfo(Base):
                  dump_dir: str = None,
                  skip_lock_table: bool = False,
                  column_statistics: int = None,
+                 routines: str = '0',
+                 create_schema: str = '0',
                  mentions: str = '[]',
                  dump_time: str = '[]',
                  svn_url: str = None,
@@ -105,6 +109,8 @@ class BackupInfo(Base):
         self.dump_dir = dump_dir
         self.skip_lock_table = skip_lock_table
         self.column_statistics = column_statistics
+        self.routines = routines
+        self.create_schema = create_schema
         self.dump_time = dump_time
         self.mentions = mentions
         self.svn_url = svn_url

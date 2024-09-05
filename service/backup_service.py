@@ -38,7 +38,9 @@ def process(db_info: BackupInfo):
                 BackupType.SCP: lambda: scp_service.pull(db_info),
                 BackupType.PostgreSQL: lambda: database_backup(db_info),
             }
-            p = switcher.get(db_info.backup_type, lambda: ResultObject(status=Status.ERROR,message='Invalid Backup Type', data='Invalid Backup Type'))
+            p = switcher.get(db_info.backup_type,
+                             lambda: ResultObject(status=Status.ERROR, message='Invalid Backup Type',
+                                                  data='Invalid Backup Type'))
             return p()
         else:
             return ResultObject(Status.ERROR, 'Permission Denied ', db_info.dump_dir)
@@ -51,7 +53,8 @@ def database_backup(db_info: BackupInfo):
     step_arr = []
     if not file_utils.is_exist(db_info.dump_dir):
         out = SvnUtils.check_out(db_info)
-        step_arr += out.data
+        if out:
+            step_arr += out.data
     version = get_version(db_info)  # get version
     if version.status == Status.OK:
         step_arr.append("Version: " + version.data)

@@ -65,14 +65,16 @@ def dump(db_info: BackupInfo):
 
 def restore(db_info: BackupInfo):
     try:
-        # /home/vinhn/Downloads/mongodb-database-tools-ubuntu1804-x86_64-100.7.1/bin/mongorestore
+        # mongorestore
         # --host=172.18.101.75
         # --port=27017
         # --username=root
-        # --password=123456
+        # --password="123456"
         # --authenticationDatabase=admin
         # --drop
-        # --nsInclude="kotei_shisan.*" /var/www/backup_db/kotei_shisan/2023.05.29/
+        # --db=kotei_shisan
+        # /media/vinhn/DATA/0_PROJECTS/kotei_shisan/
+
         cmd_format = "{path_exec}  " \
                      "--host={host} " \
                      "--port={port}  " \

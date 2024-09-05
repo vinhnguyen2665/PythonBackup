@@ -120,17 +120,33 @@ def test_postgresql():
 
 def test_mysql():
     db_info = BackupInfo()
-    db_info.__init__(host='172.18.101.75',
-                     port=3306,
+    # db_info.__init__(host='10.146.0.62',
+    #                      port=3306,
+    #                      username='root',
+    #                      password='Srv@20210330',
+    #                      backup_type=BackupType.MySQL,
+    #                      database_name='builddata',
+    #                      skip_lock_table=True,
+    #                      column_statistics=0,
+    #                      dump_dir='/var/www/backup_db/test_builddata_honban',
+    #                      mentions=json.dumps(['<@U3DA4PCCW>']),
+    #                      svn_url='https://nsmp-system.com/svn/backup_db/builddata/',
+    #                      svn_password='vinh1996',
+    #                      svn_username='vinhnq')
+    db_info.__init__(host='172.18.101.62',
+                     port=3307,
                      username='root',
                      password='123456',
                      backup_type=BackupType.MySQL,
-                     database_name='rfid_sendai',
-                     dump_dir='/var/www/backup_db/openproject',
-                     mentions=json.dumps(['<@UEJSM23ML>']),
-                     svn_url='https://nsmp-system.com/svn/backup_db/openproject/',
+                     database_name='morisada_release',
+                     skip_lock_table=True,
+                     column_statistics=0,
+                     dump_dir='/var/www/backup_db/test_builddata_honban',
+                     mentions=json.dumps(['<@U3DA4PCCW>']),
+                     svn_url='https://nsmp-system.com/svn/backup_db/builddata/',
+                     svn_password='vinh1996',
                      svn_username='vinhnq',
-                     svn_password='vinh1996')
+                     routines='1')
 
     # mentions = ['<@U012Q4ED5NJ>', '<!channel>']
 
@@ -147,6 +163,7 @@ def test_mysql():
     # tmp = read_completed_process(out)
     # print(tmp.message)
     # SlackUtils.post_message(db_info)
+
 
 def init_db():
     # mentions = ['<@U012Q4ED5NJ>', '<!channel>']

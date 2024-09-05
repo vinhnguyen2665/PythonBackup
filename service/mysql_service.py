@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-
 import common.shell_exec as shell
 from entity.backup_info import BackupInfo
 from common import file_utils, log, resource_utils
@@ -48,9 +47,13 @@ def dump(db_info: BackupInfo):
                      "--password=\"{password}\" " \
                      "\"{database}\" " \
                      "--result-file={dump_path} "
+        if db_info.routines is not None and db_info.routines == '1':
+            cmd_format += '--routines=true '
+        if db_info.create_schema is not None and db_info.create_schema == '1':
+            cmd_format += '--databases '
         if db_info.skip_lock_table:
             cmd_format += '--skip-lock-tables '
-        if None != db_info.column_statistics:
+        if db_info.column_statistics is not None:
             cmd_format += '--column_statistics={column_statistics} '
 
         # no_tablespaces_ver_57 = "5.7.31"

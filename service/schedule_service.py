@@ -29,7 +29,7 @@ class ScheduleService:
                 self.running = True
                 log.info("I'm working...")
                 conditions = BackupInfo()
-                conditions.delete_flg = 0
+                conditions.delete_flg = 2
                 lst = self.database_info_service.find_list_database_info(conditions)
                 if lst:
                     for info in lst:

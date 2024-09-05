@@ -48,8 +48,10 @@ def pull(db_info: BackupInfo):
         return ResultObject(status=Status.ERROR, message=db_info.__str__() + ' ' + e.__str__(), data=step_arr)
 
     sftp = client.open_sftp()
+
     try:
-        files = ftp_walk(client, sftp, db_info, db_info.remote_folder)
+        files, mess = ftp_walk(client, sftp, db_info, db_info.remote_folder)
+        step_arr += mess
     except Exception as e:
         log.error(e)
         step_arr.append(e.__str__())
@@ -194,13 +196,43 @@ def local_walk(path):
     return res
 
 
+def get_remote_permission(client, path):
+    stdin, stdout, stderr = client.exec_command('ls -lasd ' + path, get_pty=True)
+    for line in iter(stdout.readline, ""):
+        print(line)
+
+
+def set_remote_permission(client, db_info, permissions_int, path):
+    if db_info.authentication_method == AuthenticationMethod.Password:
+        cmd = "echo " + db_info.password + " | sudo chmod " + permissions_int + " " + path
+    else:
+        cmd = "sudo chmod " + permissions_int + " " + path
+    stdin, stdout, stderr = client.exec_command(cmd)
+    log.info(db_info.host)
+    log.info(cmd)
+
+
 def ftp_walk(client, sftp, db_info, remote_path):
     res = []
+    mes = []
 
     try:
-        filelist = sftp.listdir_attr(remote_path)
+        try:
+            filelist = sftp.listdir_attr(remote_path)
+        except PermissionError as per_err:
+            log.error(db_info.host)
+            log.error(per_err)
+            set_remote_permission(client=client, permissions_int='754', db_info=db_info, path=remote_path)
+            filelist = sftp.listdir_attr(remote_path)
+
+        stdin, stdout, stderr = client.exec_command("cd " + remote_path + " && ls -la")
+        lines = stdout.readlines()
+        for line in lines:
+            print(line)
     except Exception as e:
         log.error(e)
+        mes.append(e)
+        return res, mes
 
     for entry in filelist:
         mode = entry.st_mode
@@ -215,12 +247,8 @@ def ftp_walk(client, sftp, db_info, remote_path):
         if S_ISDIR(mode):
             print(path + " is folder")
             if int(read_permission) < 5:
-                permissions_int = permissions_int[:2] + '5'
-                if db_info.authentication_method == AuthenticationMethod.Password:
-                    cmd = "echo " + db_info.password + " | sudo chmod " + permissions_int + " " + path
-                else:
-                    cmd = "sudo chmod " + permissions_int + " " + path
-                stdin, stdout, stderr = client.exec_command(cmd)
+                permissions_int = permissions_int[:2] + '4'
+                set_remote_permission(client=client, permissions_int=permissions_int, db_info=db_info, path=path)
 
             res.append(FileInfo(file_type=FileType.DIR,
                                 path=path,
@@ -228,7 +256,7 @@ def ftp_walk(client, sftp, db_info, remote_path):
                                 last_modified=m_time,
                                 permissions=permissions_int))
 
-            _walks = ftp_walk(client, sftp, db_info, path)
+            _walks, _mess = ftp_walk(client, sftp, db_info, path)
             res += _walks
         elif S_ISREG(mode):
             print(path + " is file")
@@ -246,4 +274,4 @@ def ftp_walk(client, sftp, db_info, remote_path):
                                 access_time=a_time,
                                 last_modified=m_time,
                                 permissions=permissions_int))
-    return res
+    return res, mes

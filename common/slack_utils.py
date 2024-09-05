@@ -111,6 +111,7 @@ class SlackUtils:
             #     color="#1666EE",
             #     # blocks=mentions_block,
             #     attachments=message_attachments)
+
             response = SlackUtils.webhook.send(
                 attachments=message_attachments)
             print(response.body)
